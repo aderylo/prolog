@@ -41,15 +41,14 @@ przetwarzaj :-
       format('Brak trasy z ~p do ~p.~n', [Start, Meta])
     ).
 
+% trasa(r1, zakopane, brzeziny, rower, oba, 25).
+ 
+findPaths(Start, End) :-
+  trasa(_Id, Start, End, _Type, _Dir, _Len). 
 
-findPaths(From, To, Path):-
-  findPaths(From, To, [From], Path).
+findPaths(Start, End) :-
+  trasa(_Id, Start, Inter, _Type, _Dir, _Len),
+  findPaths(Inter, End). 
 
-findPaths(X, X, T, T).
-findPaths(X, Y, T, NT) :-
-    (trasa(_Id, X, Z, _Type, _Dir, _Len);
-      trasa(_Id, Z, X, _Type, oba, _Len)), 
-    \+ member(Z,T),
-    findPaths(Z, Y, [Z|T], NT).  
 
 
