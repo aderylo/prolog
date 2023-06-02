@@ -21,32 +21,48 @@ trasa(s4, jura, czestochowa, piesza, oba, 40).
 
 
 user:runtime_entry(start):-
-    (current_prolog_flag(argv, [File]) ->
-        set_prolog_flag(fileerrors, off),
-        (compile(File) -> true
-         ;
-	 format('Error opening file ~p.\n', [File])
-        ),
-        prompt(_Old, ''),         % pusty prompt
-	przetwarzaj
-     ;
-	write('Incorrect usage, use: program <file>\n')
-    ).
+  (current_prolog_flag(argv, [File]) ->
+    set_prolog_flag(fileerrors, off),
+    (
+      compile(File) -> true;
+	    format('Error opening file ~p.\n', [File])
+    ),
+	  przetwarzaj;
+	  write('Incorrect usage, use: program <file>\n')
+  ).
 
 
 % właściwe przetwarzanie
  
 przetwarzaj :-
-    write('Podaj miejsce startu: '),
-    read(Start),
-    write('Podaj koniec: '),
-    read(Meta),
+  write('Podaj miejsce startu: '),
+  read(Start),
+  write('Podaj koniec: '),
+  read(End),
+  write('Podaj warunki: '),
+  evalConditions(Conditions, Types, LenCondtion),
+  (
+    findPaths(Start, End, Types, LenCondtion, Path) ->
     (
-      trasa(_Id, Start, Meta, _Rodzaj, _Kierunek, Km) ->
-      format('Istnieje trasa dlugosci ~d.~n', [Km])
-    ;
-      format('Brak trasy z ~p do ~p.~n', [Start, Meta])
-    ).
+      format('Istnieje trasa dlugosci ~d.~n', [Km]),
+      write('Trasa: '), write(Path), nl 
+    );
+    format('Brak trasy z ~p do ~p.~n', [Start, End])
+  ).
+
+evalConditions(Conditions, Types, LenCondtions) :-
+  comma_list(Conditions, ConditionsList),
+  parseConditions(ConditionsList, Types, LenCondtions).
+
+parseConditions([], [], []).
+
+parseConditions([rodzaj(X) | T], [rodzaj(X)| Types], LenCondtions) :-
+  parseConditions(T, Types, LenCondtions).
+
+parseConditions([dlugosc(Op, X) | T], Types, [dlugosc(Op, X) | LenCondtions]) :-
+  member(Op, [eq, lt, le, gt, ge]), 
+  parseConditions(T, Types, LenCondtions).
+
 
 % fix for future me, instead of places keep, transitions to comply with weird wording off
 % the task.
