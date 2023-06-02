@@ -43,9 +43,9 @@ przetwarzaj :-
   evalConditions(Conditions, Types, LenCondtion),
   write('conds all right'), 
   (
-    findPaths(Start, End, Types, LenCondtion, Path) ->
+    findPaths(Start, End, Types, LenCondtion, FinalLen, Path) ->
     (
-      % format('Istnieje trasa dlugosci ~d.~n', [Km]),
+      format('Istnieje trasa dlugosci ~d.~n', [FinalLen]),      
       write('Trasa: '), write(Path), nl 
     );
     format('Brak trasy z ~p do ~p.~n', [Start, End])
@@ -71,14 +71,14 @@ parseConditions([dlugosc(Op, X) | T], Types, [dlugosc(Op, X) | LenCondtions]) :-
 % fix for future me, instead of places keep, transitions to comply with weird wording off
 % the task.
 
-findPaths(From, To, Types, LenCondtion, Path):-
-  findPaths(From, To, Types, LenCondtion, 0, [], Path).
+findPaths(From, To, Types, LenCondtion, FinalLen, Path):-
+  findPaths(From, To, Types, LenCondtion, 0, FinalLen, [], Path).
 
-findPaths(X, X, _Types, (Op, SpecLen), Len, T, T) :- 
+findPaths(X, X, _Types, (Op, SpecLen), Len, Len, T, T) :- 
   evalFinalLength(Op, SpecLen, Len).
 
 % Path consists of stages: stage(Start, id, type, End)
-findPaths(X, Y, Types, LenCondtion, TotalLen, T, NT) :-
+findPaths(X, Y, Types, LenCondtion, TotalLen, FinalLen, T, NT) :-
   (
     trasa(Id, X, Z, Type, _Dir, Len);
     trasa(Id, Z, X, Type, oba, Len) 
@@ -86,7 +86,7 @@ findPaths(X, Y, Types, LenCondtion, TotalLen, T, NT) :-
   (member(Type, Types) ; Types = nil),
   S = stage(X, Id, Type, Z), 
   \+ member(S,T),
-  findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, [S|T], NT).  
+  findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, FinalLen, [S|T], NT).  
 
 
 evalFinalLength(eq, SpecLen, ActualLen) :-
