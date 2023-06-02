@@ -69,20 +69,21 @@ parseConditions([dlugosc(Op, X) | T], Types, [dlugosc(Op, X) | LenCondtions]) :-
 % the task.
 
 findPaths(From, To, Types, LenCondtion, Path):-
-  findPaths(From, To, Types, LenCondtion, 0, [From], Path).
+  findPaths(From, To, Types, LenCondtion, 0, [], Path).
 
 findPaths(X, X, _Types, (Op, SpecLen), Len, T, T) :- 
   evalFinalLength(Op, SpecLen, Len).
 
-
+% Path consists of stages: stage(Start, id, type, End)
 findPaths(X, Y, Types, LenCondtion, TotalLen, T, NT) :-
   (
-    trasa(_Id, X, Z, Type, _Dir, Len);
-    trasa(_Id, Z, X, Type, oba, Len) 
+    trasa(Id, X, Z, Type, _Dir, Len);
+    trasa(Id, Z, X, Type, oba, Len) 
   ),
   (member(Type, Types) ; Types = nil),
-  \+ member(Z,T),
-  findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, [Z|T], NT).  
+  S = stage(X, Id, Type, Z), 
+  \+ member(S,T),
+  findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, [S|T], NT).  
 
 
 evalFinalLength(eq, SpecLen, ActualLen) :-
