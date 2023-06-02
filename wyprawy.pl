@@ -18,6 +18,14 @@
 % trasa(s4, jura, czestochowa, piesza, oba, 40). 
 ensure_loaded(library(lists)).
 
+% === printing paths =================================================================
+
+printPath([]) :-
+  nl.
+printPath([stage(Start, Id, Type, End) |T]) :- 
+  format('~p - (~p, ~p) -> ~p', [Start, Id, Type, End]),
+  printPath(T). 
+
 
 user:runtime_entry(start):-
   (current_prolog_flag(argv, [File]) ->
@@ -39,14 +47,14 @@ przetwarzaj :-
   write('Podaj koniec: '),
   read(End),
   write('Podaj warunki: '),
-  read(Conditions), 
+  read(Conditions),
   evalConditions(Conditions, Types, LenCondtion),
-  write('conds all right'), 
   (
     findPaths(Start, End, Types, LenCondtion, FinalLen, Path) ->
     (
-      format('Istnieje trasa dlugosci ~d.~n', [FinalLen]),      
-      write('Trasa: '), write(Path), nl 
+      reverse_list(Path, RPath), 
+      printPath(RPath),
+      format('Dlugosc trasy: ~d.~n', [FinalLen])     
     );
     format('Brak trasy z ~p do ~p.~n', [Start, End])
   ).
@@ -67,9 +75,9 @@ parseConditions([dlugosc(Op, X) | T], Types, [dlugosc(Op, X) | LenCondtions]) :-
   member(Op, [eq, lt, le, gt, ge]), 
   parseConditions(T, Types, LenCondtions).
 
-
-% fix for future me, instead of places keep, transitions to comply with weird wording off
-% the task.
+parseConditions([E | T], Types, LenCondtions) :-
+  format('Error: niepoprawny warunek - ~p', [E]),
+  false. 
 
 findPaths(From, To, Types, LenCondtion, FinalLen, Path):-
   findPaths(From, To, Types, LenCondtion, 0, FinalLen, [], Path).
@@ -84,7 +92,7 @@ findPaths(X, Y, Types, LenCondtion, TotalLen, FinalLen, T, NT) :-
     trasa(Id, Z, X, Type, oba, Len) 
   ),
   (member(Type, Types) ; Types = nil),
-  S = stage(X, Id, Type, Z), 
+  S = stage(X, Id, Type, Z),
   \+ member(S,T),
   findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, FinalLen, [S|T], NT).  
 
@@ -105,3 +113,8 @@ evalFinalLength(ge, SpecLen, ActualLen) :-
 
 tupleToList((X, T), [X | L]) :- tupleToList(T,L).
 tupleToList(X, [X]) :- X \= (_, _). 
+
+reverse_list([], []).
+reverse_list([X|Xs], Reversed) :-
+    reverse_list(Xs, ReversedTail),
+    append(ReversedTail, [X], Reversed).
