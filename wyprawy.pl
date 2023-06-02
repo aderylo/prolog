@@ -38,17 +38,36 @@ user:runtime_entry(start):-
 	  write('Incorrect usage, use: program <file>\n')
   ).
 
+% === input reading =================================================================
 
-% właściwe przetwarzanie
- 
-przetwarzaj :-
+processStart(Start) :-
   write('Podaj miejsce startu: '),
   read(Start),
+  (
+    Start == 'koniec'
+    -> write('Koniec programu. Milych wedrowek!\n')
+    ; true 
+  ). 
+
+processEnd(End) :-
   write('Podaj koniec: '),
-  read(End),
+  read(End). 
+
+processConditions(Types, LenCondtion) :-
   write('Podaj warunki: '),
   read(Conditions),
-  evalConditions(Conditions, Types, LenCondtion),
+  (
+    evalConditions(Conditions, Types, LenCondtion)
+    -> true
+    ; processConditions(Types, LenCondtion)
+  ).
+
+% === main  ========================================================================
+
+przetwarzaj :-
+  processStart(Start),
+  processEnd(End), 
+  processConditions(Types, LenCondtion), 
   (
     findPaths(Start, End, Types, LenCondtion, FinalLen, Path) ->
     (
@@ -57,7 +76,8 @@ przetwarzaj :-
       format('Dlugosc trasy: ~d.~n', [FinalLen])     
     );
     format('Brak trasy z ~p do ~p.~n', [Start, End])
-  ).
+  ),
+  przetwarzaj. 
 
 % === input parsing =================================================================
 evalConditions(nil, nil, (ge, 0)).
@@ -76,7 +96,7 @@ parseConditions([dlugosc(Op, X) | T], Types, [dlugosc(Op, X) | LenCondtions]) :-
   parseConditions(T, Types, LenCondtions).
 
 parseConditions([E | T], Types, LenCondtions) :-
-  format('Error: niepoprawny warunek - ~p', [E]),
+  format('Error: niepoprawny warunek - ~p\n', [E]),
   false. 
 
 findPaths(From, To, Types, LenCondtion, FinalLen, Path):-
