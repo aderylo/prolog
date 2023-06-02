@@ -16,8 +16,7 @@ trasa(s1, warszawa, krakow, rower, oba, 50).
 trasa(s2, warszawa, czestochowa, rower, oba, 100).
 trasa(s3, krakow, jura, rower, oba, 30). 
 trasa(s4, jura, czestochowa, piesza, oba, 40). 
-
-
+ensure_loaded(library(lists)).
 
 
 user:runtime_entry(start):-
@@ -50,8 +49,10 @@ przetwarzaj :-
     format('Brak trasy z ~p do ~p.~n', [Start, End])
   ).
 
+% === input parsing =================================================================
+
 evalConditions(Conditions, Types, LenCondtions) :-
-  comma_list(Conditions, ConditionsList),
+  tupleToList(Conditions, ConditionsList),
   parseConditions(ConditionsList, Types, LenCondtions).
 
 parseConditions([], [], []).
@@ -95,3 +96,8 @@ evalFinalLength(gt, SpecLen, ActualLen) :-
 evalFinalLength(ge, SpecLen, ActualLen) :-
   (ActualLen > SpecLen ; ActualLen =:= SpecLen).
 
+% === aux ====================================================================
+% Auxiliary functions used in the program
+
+tupleToList((X, T), [X | L]) :- tupleToList(T,L).
+tupleToList(X, [X]) :- X \= (_, _). 
