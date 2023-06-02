@@ -12,6 +12,13 @@ trasa(g5, gasienicowa, czarnystaw, gorska, oba, 3).
 trasa(g6, zawrat, kozia, gorska, jeden, 5).
 trasa(g7, kozia, gasienicowa, gorska, jeden, 7).
 trasa(p1, zakopane, gubalowka, piesza, oba, 5).
+trasa(s1, warszawa, krakow, rower, oba, 50).
+trasa(s2, warszawa, czestochowa, rower, oba, 100).
+trasa(s3, krakow, jura, rower, oba, 30). 
+trasa(s4, jura, czestochowa, piesza, oba, 40). 
+
+
+
 
 user:runtime_entry(start):-
     (current_prolog_flag(argv, [File]) ->
@@ -28,7 +35,7 @@ user:runtime_entry(start):-
 
 
 % właściwe przetwarzanie
-
+ 
 przetwarzaj :-
     write('Podaj miejsce startu: '),
     read(Start),
@@ -41,15 +48,34 @@ przetwarzaj :-
       format('Brak trasy z ~p do ~p.~n', [Start, Meta])
     ).
 
+% fix for future me, instead of places keep, transitions to comply with weird wording off
+% the task.
 
-findPaths(From, To, Path):-
-  findPaths(From, To, [From], Path).
+findPaths(From, To, Types, LenCondtion, Path):-
+  findPaths(From, To, Types, LenCondtion, 0, [From], Path).
 
-findPaths(X, X, T, T).
-findPaths(X, Y, T, NT) :-
-    (trasa(_Id, X, Z, _Type, _Dir, _Len);
-      trasa(_Id, Z, X, _Type, oba, _Len)), 
-    \+ member(Z,T),
-    findPaths(Z, Y, [Z|T], NT).  
+findPaths(X, X, _Types, (Op, SpecLen), Len, T, T) :- 
+  evalFinalLength(Op, SpecLen, Len).
 
+
+findPaths(X, Y, Types, LenCondtion, TotalLen, T, NT) :-
+  (
+    trasa(_Id, X, Z, Type, _Dir, Len);
+    trasa(_Id, Z, X, Type, oba, Len) 
+  ),
+  (member(Type, Types) ; Types = nil),
+  \+ member(Z,T),
+  findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, [Z|T], NT).  
+
+
+evalFinalLength(eq, SpecLen, ActualLen) :-
+  SpecLen =:= ActualLen. 
+evalFinalLength(lt, SpecLen, ActualLen) :-
+  ActualLen < SpecLen.
+evalFinalLength(le, SpecLen, ActualLen) :-
+  (ActualLen < SpecLen ; ActualLen =:= SpecLen).
+evalFinalLength(gt, SpecLen, ActualLen) :-
+  ActualLen > SpecLen.
+evalFinalLength(ge, SpecLen, ActualLen) :-
+  (ActualLen > SpecLen ; ActualLen =:= SpecLen).
 
