@@ -115,7 +115,7 @@ findPaths(X, Y, Types, LenCondtion, TotalLen, FinalLen, T, NT) :-
     trasa(Id, Z, X, Type, oba, Len) 
   ),
   (member(Type, Types) ; Types = nil),
-  S = stage(X, Id, Type, Z),
+  S = stage(X, Id, Type, Z, Len),
   \+ member(S,T),
   findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, FinalLen, [S|T], NT).  
 
@@ -160,14 +160,23 @@ reverse_list([X|Xs], Reversed) :-
     reverse_list(Xs, ReversedTail),
     append(ReversedTail, [X], Reversed).
 
+pathLen([], 0).
+pathLen([stage(Start, Id, Type, End, Len) | []], Len).
+pathLen([stage(Start, Id, Type, End, Len) | T], TailLen + Len) :-
+  pathLen(T, TailLen).
+
+
 printPath([]). 
-printPath([stage(Start, Id, Type, End) | []]) :-
+printPath([stage(Start, Id, Type, End, _Len) | []]) :-
   format('~p - (~p, ~p) -> ~p\n', [Start, Id, Type, End]).
-printPath([stage(Start, Id, Type, _End) | T]) :- 
+printPath([stage(Start, Id, Type, _End, _Len) | T]) :- 
   format('~p - (~p, ~p) ->', [Start, Id, Type]),
   printPath(T). 
 
 printPathList([H | T]) :-
   reverse_list(H, R), 
-  printPath(R), printPathList(T). 
+  pathLen(R, Len), 
+  printPath(R),
+  format('Dlugosc trasy: ~d\n\n', Len), 
+  printPathList(T). 
 printPathList(_). 
