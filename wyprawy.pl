@@ -52,7 +52,7 @@ processStart(Start) :-
   read(Start),
   (
     Start == 'koniec'
-    -> write('Koniec programu. Milych wedrowek!\n')
+    -> write('Koniec programu. Milych wedrowek!\n'), halt
     ; true 
   ). 
 
