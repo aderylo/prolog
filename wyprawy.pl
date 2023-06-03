@@ -76,7 +76,8 @@ evalConditions(nil, nil, (ge, 0)).
 evalConditions(Conditions, Types, LenCondtion) :-
   tupleToList(Conditions, ConditionsList),
   parseConditions(ConditionsList, Types, LenCondtions), 
-  parseLenConditions(LenCondtions, LenCondtion).
+  parseLenConditions(LenCondtions, LenCondtion),
+  write(LenCondtion). 
 
 parseConditions([], [], []).
 
@@ -93,9 +94,9 @@ parseConditions([E | T], Types, LenCondtions) :-
 
 
 parseLenConditions([], (ge, 0)). 
-parseLenConditions([(Op, X) | LenCondtions], (Op, X)). 
+parseLenConditions([(Op, X) | []], (Op, X)). 
 parseLenConditions([(Op, X) | LenCondtions], _) :-
-  write('Zbyt wiele warunków na długość'). 
+  write('Zbyt wiele warunków na długość'),
   false. 
 
   
