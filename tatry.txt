@@ -10,3 +10,4 @@ trasa(g5, gasienicowa, czarnystaw, gorska, oba, 3).
 trasa(g6, zawrat, kozia, gorska, jeden, 5).
 trasa(g7, kozia, gasienicowa, gorska, jeden, 7).
 trasa(p1, zakopane, gubalowka, piesza, oba, 5).
+trasa(p2, a, b, piesza, jeden, 5).

@@ -1,31 +1,7 @@
-% Przykładowy program głowny w Prologu
-
-% trasa(r1, zakopane, brzeziny, rower, oba, 25).
-% trasa(r2, brzeziny, gasienicowa, rower, oba, 15).
-% trasa(r3, brzeziny, poroniec, rower, oba, 10).
-% trasa(r4, poroniec, rusinowa, rower, oba, 6).
-% trasa(g1, zakopane, kuznice, gorska, oba, 7).
-% trasa(g2, zakopane, kalatowki, gorska, oba, 5).
-% trasa(g3, kuznice, gasienicowa, gorska, oba, 7).
-% trasa(g4, gasienicowa, zawrat, gorska, oba, 6).
-% trasa(g5, gasienicowa, czarnystaw, gorska, oba, 3).
-% trasa(g6, zawrat, kozia, gorska, jeden, 5).
-% trasa(g7, kozia, gasienicowa, gorska, jeden, 7).
-% trasa(p1, zakopane, gubalowka, piesza, oba, 5).
-% trasa(s1, warszawa, krakow, rower, oba, 50).
-% trasa(s2, warszawa, czestochowa, rower, oba, 100).
-% trasa(s3, krakow, jura, rower, oba, 30). 
-% trasa(s4, jura, czestochowa, piesza, oba, 40). 
 ensure_loaded(library(lists)).
 
-% === printing paths =================================================================
 
-printPath([]) :-
-  nl.
-printPath([stage(Start, Id, Type, End) |T]) :- 
-  format('~p - (~p, ~p) -> ~p', [Start, Id, Type, End]),
-  printPath(T). 
-
+% === main  ========================================================================
 
 user:runtime_entry(start):-
   (current_prolog_flag(argv, [File]) ->
@@ -37,6 +13,21 @@ user:runtime_entry(start):-
 	  przetwarzaj;
 	  write('Incorrect usage, use: program <file>\n')
   ).
+
+przetwarzaj :-
+  processStart(Start),
+  processEnd(End), 
+  processConditions(Types, LenCondtion), 
+  (
+    findPaths(Start, End, Types, LenCondtion, FinalLen, Path) ->
+    (
+      reverse_list(Path, RPath), 
+      printPath(RPath),
+      format('Dlugosc trasy: ~d.~n', [FinalLen])     
+    );
+    format('Brak trasy z ~p do ~p.~n', [Start, End])
+  ),
+  przetwarzaj. 
 
 % === input reading =================================================================
 
@@ -60,24 +51,7 @@ processConditions(Types, LenCondtion) :-
     evalConditions(Conditions, Types, LenCondtion)
     -> true
     ; processConditions(Types, LenCondtion)
-  ).
-
-% === main  ========================================================================
-
-przetwarzaj :-
-  processStart(Start),
-  processEnd(End), 
-  processConditions(Types, LenCondtion), 
-  (
-    findPaths(Start, End, Types, LenCondtion, FinalLen, Path) ->
-    (
-      reverse_list(Path, RPath), 
-      printPath(RPath),
-      format('Dlugosc trasy: ~d.~n', [FinalLen])     
-    );
-    format('Brak trasy z ~p do ~p.~n', [Start, End])
-  ),
-  przetwarzaj. 
+  ).  
 
 % === input parsing =================================================================
 evalConditions(nil, nil, (ge, 0)).
@@ -99,6 +73,8 @@ parseConditions([E | T], Types, LenCondtions) :-
   format('Error: niepoprawny warunek - ~p\n', [E]),
   false. 
 
+% === path finding =================================================================
+
 findPaths(From, To, Types, LenCondtion, FinalLen, Path):-
   findPaths(From, To, Types, LenCondtion, 0, FinalLen, [], Path).
 
@@ -116,6 +92,8 @@ findPaths(X, Y, Types, LenCondtion, TotalLen, FinalLen, T, NT) :-
   \+ member(S,T),
   findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, FinalLen, [S|T], NT).  
 
+
+% === length criteria ==============================================================
 
 evalFinalLength(eq, SpecLen, ActualLen) :-
   SpecLen =:= ActualLen. 
@@ -138,3 +116,10 @@ reverse_list([], []).
 reverse_list([X|Xs], Reversed) :-
     reverse_list(Xs, ReversedTail),
     append(ReversedTail, [X], Reversed).
+
+printPath([]). 
+printPath([stage(Start, Id, Type, End) | []]) :-
+  format('~p - (~p, ~p) -> ~p\n', [Start, Id, Type, End]).
+printPath([stage(Start, Id, Type, _End) | T]) :- 
+  format('~p - (~p, ~p) ->', [Start, Id, Type]),
+  printPath(T). 
