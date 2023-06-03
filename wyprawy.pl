@@ -36,11 +36,9 @@ przetwarzaj :-
   processEnd(End), 
   processConditions(Types, LenCondtion), 
   (
-    findPaths(Start, End, Types, LenCondtion, FinalLen, Path) ->
-    (
-      reverse_list(Path, RPath), 
-      printPath(RPath),
-      format('Dlugosc trasy: ~d.~n', [FinalLen])     
+    (listOfAllPaths(Start, End, Types, LenCondtion, PathL),
+      member(_,PathL),
+      printPathList(PathL)
     );
     format('Brak trasy z ~p do ~p.~n', [Start, End])
   ),
@@ -157,3 +155,8 @@ printPath([stage(Start, Id, Type, End) | []]) :-
 printPath([stage(Start, Id, Type, _End) | T]) :- 
   format('~p - (~p, ~p) ->', [Start, Id, Type]),
   printPath(T). 
+
+printPathList([H | T]) :-
+  reverse_list(H, R), 
+  printPath(R), printPathList(T). 
+printPathList(_). 
