@@ -14,8 +14,9 @@ trasa(g6, zawrat, kozia, gorska, jeden, 5).
 trasa(g7, kozia, gasienicowa, gorska, jeden, 7).
 trasa(p1, zakopane, gubalowka, piesza, oba, 5).
 trasa(d1, a, b, piesza, jeden, 5).
-trasa(d2, a, c, piesza, jeden, 5).
-trasa(d3, b, c, piesza, jeden, 5).
+trasa(d2, a, c, piesza, oba, 5).
+trasa(d3, b, c, rower, jeden, 5).
+
 
 
 % === main  ========================================================================
@@ -34,7 +35,7 @@ user:runtime_entry(start):-
 przetwarzaj :-
   processStart(Start),
   processEnd(End), 
-  processConditions(Types, LenCondtion), 
+  processConditions(Types, LenCondtion),
   (
     (listOfAllPaths(Start, End, Types, LenCondtion, PathL),
       member(_,PathL),
@@ -72,22 +73,32 @@ processConditions(Types, LenCondtion) :-
 
 evalConditions(nil, nil, (ge, 0)).
 
-evalConditions(Conditions, Types, LenCondtions) :-
+evalConditions(Conditions, Types, LenCondtion) :-
   tupleToList(Conditions, ConditionsList),
-  parseConditions(ConditionsList, Types, LenCondtions).
+  parseConditions(ConditionsList, Types, LenCondtions), 
+  parseLenConditions(LenCondtions, LenCondtion).
 
 parseConditions([], [], []).
 
-parseConditions([rodzaj(X) | T], [rodzaj(X)| Types], LenCondtions) :-
+parseConditions([rodzaj(X) | T], [X | Types], LenCondtions) :-
   parseConditions(T, Types, LenCondtions).
 
-parseConditions([dlugosc(Op, X) | T], Types, [dlugosc(Op, X) | LenCondtions]) :-
+parseConditions([dlugosc(Op, X) | T], Types, [(Op, X) | LenCondtions]) :-
   member(Op, [eq, lt, le, gt, ge]), 
   parseConditions(T, Types, LenCondtions).
 
 parseConditions([E | T], Types, LenCondtions) :-
   format('Error: niepoprawny warunek - ~p\n', [E]),
   false. 
+
+
+parseLenConditions([], (ge, 0)). 
+parseLenConditions([(Op, X) | LenCondtions], (Op, X)). 
+parseLenConditions([(Op, X) | LenCondtions], _) :-
+  write('Zbyt wiele warunków na długość'). 
+  false. 
+
+  
 
 % === path finding =================================================================
 
