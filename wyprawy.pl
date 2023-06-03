@@ -1,6 +1,23 @@
 ensure_loaded(library(lists)).
 
 
+trasa(r1, zakopane, brzeziny, rower, oba, 25).
+trasa(r2, brzeziny, gasienicowa, rower, oba, 15).
+trasa(r3, brzeziny, poroniec, rower, oba, 10).
+trasa(r4, poroniec, rusinowa, rower, oba, 6).
+trasa(g1, zakopane, kuznice, gorska, oba, 7).
+trasa(g2, zakopane, kalatowki, gorska, oba, 5).
+trasa(g3, kuznice, gasienicowa, gorska, oba, 7).
+trasa(g4, gasienicowa, zawrat, gorska, oba, 6).
+trasa(g5, gasienicowa, czarnystaw, gorska, oba, 3).
+trasa(g6, zawrat, kozia, gorska, jeden, 5).
+trasa(g7, kozia, gasienicowa, gorska, jeden, 7).
+trasa(p1, zakopane, gubalowka, piesza, oba, 5).
+trasa(d1, a, b, piesza, jeden, 5).
+trasa(d2, a, c, piesza, jeden, 5).
+trasa(d3, b, c, piesza, jeden, 5).
+
+
 % === main  ========================================================================
 
 user:runtime_entry(start):-
@@ -54,6 +71,7 @@ processConditions(Types, LenCondtion) :-
   ).  
 
 % === input parsing =================================================================
+
 evalConditions(nil, nil, (ge, 0)).
 
 evalConditions(Conditions, Types, LenCondtions) :-
@@ -92,6 +110,22 @@ findPaths(X, Y, Types, LenCondtion, TotalLen, FinalLen, T, NT) :-
   \+ member(S,T),
   findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, FinalLen, [S|T], NT).  
 
+% === find all paths ===============================================================
+
+listOfAllPaths(Start, End, Types, LenCondtion, Loa) :- 
+  listOfAllPaths(Start, End, Types, LenCondtion, [], Loa), !.
+listOfAllPaths(Start, End, Types, LenCondtion, Acc, Loa) :- 
+  dec(Start, End, Types, LenCondtion, Y), 
+  uList(Y, Acc, AccNew), 
+  listOfAllPaths(Start, End, Types, LenCondtion,AccNew, Loa).
+listOfAllPaths(Start, End, Types, LenCondtion, Acc, Acc).
+
+dec(Start, End, Types, LenCondtion, Path) :- 
+  findPaths(Start, End, Types, LenCondtion, FinalLen, Path). 
+
+uList(X, [], [X])  :- !.
+uList(H, [H|_], _) :- !, fail.
+uList(X, [H|T], L) :- uList(X, T, Rtn), L = [H|Rtn].  
 
 % === length criteria ==============================================================
 
