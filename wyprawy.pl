@@ -1,24 +1,5 @@
 ensure_loaded(library(lists)).
 
-
-trasa(r1, zakopane, brzeziny, rower, oba, 25).
-trasa(r2, brzeziny, gasienicowa, rower, oba, 15).
-trasa(r3, brzeziny, poroniec, rower, oba, 10).
-trasa(r4, poroniec, rusinowa, rower, oba, 6).
-trasa(g1, zakopane, kuznice, gorska, oba, 7).
-trasa(g2, zakopane, kalatowki, gorska, oba, 5).
-trasa(g3, kuznice, gasienicowa, gorska, oba, 7).
-trasa(g4, gasienicowa, zawrat, gorska, oba, 6).
-trasa(g5, gasienicowa, czarnystaw, gorska, oba, 3).
-trasa(g6, zawrat, kozia, gorska, jeden, 5).
-trasa(g7, kozia, gasienicowa, gorska, jeden, 7).
-trasa(p1, zakopane, gubalowka, piesza, oba, 5).
-trasa(d1, a, b, piesza, jeden, 5).
-trasa(d2, a, c, piesza, oba, 5).
-trasa(d3, b, c, rower, jeden, 5).
-
-
-
 % === main  ========================================================================
 
 user:runtime_entry(start):-
@@ -48,7 +29,7 @@ przetwarzaj :-
 % === input reading =================================================================
 
 processStart(Start) :-
-  write('Podaj miejsce startu: '),
+  write('Podaj miejsce startu:  '),
   read(Start),
   (
     Start == 'koniec'
@@ -57,11 +38,11 @@ processStart(Start) :-
   ). 
 
 processEnd(End) :-
-  write('Podaj koniec: '),
+  write('Podaj miejsce koncowe: '),
   read(End). 
 
 processConditions(Types, LenCondtion) :-
-  write('Podaj warunki: '),
+  write('Podaj warunki : '),
   read(Conditions),
   (
     evalConditions(Conditions, Types, LenCondtion)
@@ -76,8 +57,7 @@ evalConditions(nil, nil, (ge, 0)).
 evalConditions(Conditions, Types, LenCondtion) :-
   tupleToList(Conditions, ConditionsList),
   parseConditions(ConditionsList, Types, LenCondtions), 
-  parseLenConditions(LenCondtions, LenCondtion),
-  write(LenCondtion). 
+  parseLenConditions(LenCondtions, LenCondtion).
 
 parseConditions([], [], []).
 
@@ -166,7 +146,6 @@ pathLen([stage(Start, Id, Type, End, Len) | []], Len).
 pathLen([stage(Start, Id, Type, End, Len) | T], TailLen + Len) :-
   pathLen(T, TailLen).
 
-
 printPath([]). 
 printPath([stage(Start, Id, Type, End, _Len) | []]) :-
   format('~p - (~p, ~p) -> ~p\n', [Start, Id, Type, End]).
@@ -178,6 +157,9 @@ printPathList([H | T]) :-
   reverse_list(H, R), 
   pathLen(R, Len), 
   printPath(R),
-  format('Dlugosc trasy: ~d\n\n', Len), 
+  (member(_,R) 
+    -> % path is non empty print out its length  
+    (format('Dlugosc trasy: ~d.\n\n', Len))
+    ; nl),   
   printPathList(T). 
 printPathList(_). 
