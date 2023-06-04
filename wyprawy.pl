@@ -92,7 +92,7 @@ findPaths(X, X, _Types, (Op, SpecLen), Len, Len, T, T) :-
 findPaths(X, nil, _Types, (Op, SpecLen), Len, Len, T, T) :- 
   evalFinalLength(Op, SpecLen, Len).
 
-% Path consists of stages: stage(Start, id, type, End)
+% Path consists of stages: stage(Start, id, type, End, Length)
 findPaths(X, Y, Types, LenCondtion, TotalLen, FinalLen, T, NT) :-
   (
     trasa(Id, X, Z, Type, _Dir, Len);
@@ -103,7 +103,18 @@ findPaths(X, Y, Types, LenCondtion, TotalLen, FinalLen, T, NT) :-
   \+ member(S,T),
   findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, FinalLen, [S|T], NT).  
 
+findPaths(nil, Y, Types, LenCondtion, TotalLen, FinalLen, T, NT) :-
+  (
+    trasa(Id, X, Z, Type, _Dir, Len);
+    trasa(Id, Z, X, Type, oba, Len) 
+  ),
+  (member(Type, Types) ; Types = nil),
+  S = stage(X, Id, Type, Z, Len),
+  \+ member(S,T),
+  findPaths(Z, Y, Types, LenCondtion, TotalLen+Len, FinalLen, [S|T], NT).  
+
 % === find all paths ===============================================================
+%findall implementation without assert
 
 listOfAllPaths(Start, End, Types, LenCondtion, Loa) :- 
   listOfAllPaths(Start, End, Types, LenCondtion, [], Loa), !.
