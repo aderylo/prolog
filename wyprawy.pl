@@ -89,6 +89,9 @@ findPaths(From, To, Types, LenCondtion, FinalLen, Path):-
 findPaths(X, X, _Types, (Op, SpecLen), Len, Len, T, T) :- 
   evalFinalLength(Op, SpecLen, Len).
 
+findPaths(X, nil, _Types, (Op, SpecLen), Len, Len, T, T) :- 
+  evalFinalLength(Op, SpecLen, Len).
+
 % Path consists of stages: stage(Start, id, type, End)
 findPaths(X, Y, Types, LenCondtion, TotalLen, FinalLen, T, NT) :-
   (
@@ -148,9 +151,9 @@ pathLen([stage(Start, Id, Type, End, Len) | T], TailLen + Len) :-
 
 printPath([]). 
 printPath([stage(Start, Id, Type, End, _Len) | []]) :-
-  format('~p - (~p, ~p) -> ~p\n', [Start, Id, Type, End]).
+  format('~p - (~p, ~p)-> ~p\n', [Start, Id, Type, End]).
 printPath([stage(Start, Id, Type, _End, _Len) | T]) :- 
-  format('~p - (~p, ~p) ->', [Start, Id, Type]),
+  format('~p - (~p, ~p)-> ', [Start, Id, Type]),
   printPath(T). 
 
 printPathList([H | T]) :-
