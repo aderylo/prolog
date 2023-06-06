@@ -65,11 +65,12 @@ parseConditions([rodzaj(X) | T], [X | Types], LenCondtions) :-
   parseConditions(T, Types, LenCondtions).
 
 parseConditions([dlugosc(Op, X) | T], Types, [(Op, X) | LenCondtions]) :-
-  member(Op, [eq, lt, le, gt, ge]), 
+  member(Op, [eq, lt, le, gt, ge]),
+  number(X),
   parseConditions(T, Types, LenCondtions).
 
 parseConditions([E | T], Types, LenCondtions) :-
-  format('Error: niepoprawny warunek - ~p\n', [E]),
+  format('Error: niepoprawny warunek - ~p.\n', [E]),
   false. 
 
 
